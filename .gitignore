@@ -1,0 +1,7 @@
+# Large original SAR data must not be committed
+/data/*
+!/data/.gitkeep
+.ipynb_checkpoints/
+__pycache__/
+.venv/
+.DS_Store

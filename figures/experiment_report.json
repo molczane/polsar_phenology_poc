@@ -1,0 +1,42 @@
+{
+  "title": "Full-PolSAR H/A/alpha decomposition and toy land-cover classification",
+  "data_mode": "synthetic multi-look coherency matrices",
+  "scientific_warning": "Toy simulated scattering archetypes, not a real remote-sensing accuracy assessment",
+  "random_seed": 2026,
+  "synthetic_looks": 7,
+  "spatial_average_window": 3,
+  "train_scene_shape": [
+    120,
+    180
+  ],
+  "test_scene_shape": [
+    120,
+    180
+  ],
+  "feature_names": [
+    "H",
+    "A",
+    "alpha_deg",
+    "Pauli_1",
+    "Pauli_2",
+    "Pauli_3",
+    "log_span"
+  ],
+  "class_names": [
+    "Water-like",
+    "Vegetation-like",
+    "Built-up-like"
+  ],
+  "independent_synthetic_test_scores": {
+    "span_only": {
+      "balanced_accuracy": 0.7583299034310248,
+      "macro_f1": 0.7529615406915267
+    },
+    "full_polsar": {
+      "balanced_accuracy": 0.9907772112518803,
+      "macro_f1": 0.990548345759482
+    }
+  },
+  "real_t3_path": null,
+  "real_data_note": "Only unlabeled clusters were produced if real data provided; no accuracy without reference labels."
+}
