@@ -1,0 +1,60 @@
+name: Real data — ASF NISAR
+
+on:
+  workflow_dispatch:
+    inputs:
+      granule:
+        description: 'Exact NISAR GCOV granule ID (quad-pol for download)'
+        type: string
+        required: true
+      download:
+        description: 'Download actual scene (requires EARTHDATA_TOKEN secret)'
+        type: boolean
+        default: false
+      max_download_gb:
+        description: 'Upper bound on reported granule size (GiB)'
+        type: string
+        default: '8'
+
+jobs:
+  real-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+      GRANULE: ${{ inputs.granule }}
+      DOWNLOAD: ${{ inputs.download }}
+      MAX_GB: ${{ inputs.max_download_gb }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements-real-data.txt nbclient nbformat ipykernel
+      - name: Catalog-only or authenticated download
+        shell: bash
+        run: |
+          if [[ "$DOWNLOAD" == 'true' ]]; then
+            if [[ -z "$EARTHDATA_TOKEN" ]]; then
+              echo 'Add EARTHDATA_TOKEN in repository Actions secrets before downloading.' >&2
+              exit 1
+            fi
+            python scripts/pull_real_data.py --granule "$GRANULE" --download --max-download-gb "$MAX_GB"
+          else
+            python scripts/pull_real_data.py --granule "$GRANULE" --list-only
+          fi
+      - name: Execute real-data notebook
+        if: ${{ inputs.download }}
+        run: python scripts/run_real_notebook.py --input data/real_T3.npz
+      - name: Upload derived results (not raw HDF5)
+        if: ${{ inputs.download }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-PolSAR-derived-only
+          path: |
+            executed-real-notebook.ipynb
+            figures/06_real_scene_unlabeled_clusters.png
+            data/real_T3.provenance.json
+          retention-days: 14
